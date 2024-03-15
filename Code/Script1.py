@@ -1,36 +1,52 @@
+#Gunawardhana P.K.K.C.
+#EG/2019/3596
+#Task 01
+
 import cv2
+import numpy as np
 import tkinter as tk
 from tkinter import filedialog
 
-def change_intensity(intensity_levels):
-    if original_image is not None:
-        # Convert the image to grayscale
-        grayscale_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
-        # Apply intensity levels
-        adjusted_image = cv2.convertScaleAbs(grayscale_image, alpha=intensity_levels / 255)
-        cv2.imshow("Adjusted Image", adjusted_image)
+levels = 2
+image = None
 
+#Change the number of intensity levels
+def change_intensity_levels(value):
+    global levels
+    levels = 2 ** value
+    if image is not None:
+        reduce_levels()
+
+#Reduce the number of intensity levels
+def reduce_levels():
+    global image
+    global levels
+    image_reduced_levels = np.floor_divide(image, 256 // levels) * (256 // levels)
+    cv2.imshow('Intensity Level Changed Image', image_reduced_levels)
+
+#Opening an image using a filedialog
 def open_image():
-    global original_image
-    file_path = filedialog.askopenfilename()
-    if file_path:
-        original_image = cv2.imread(file_path)
-        cv2.imshow("Original Image", original_image)
-        cv2.createTrackbar("Intensity Levels", "Original Image", 0, 255, change_intensity)
+    global image
+    filename = filedialog.askopenfilename()
+    if filename:
+        original_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+        if original_image is not None:
+            image = cv2.cvtColor(original_image, cv2.COLOR_GRAY2BGR)
+            cv2.imshow('Original Image', image)
+            reduce_levels()
+            cv2.createTrackbar('Intensity Level', 'Intensity Level Changed Image', 1, 8, change_intensity_levels)
 
-# Initialize original_image to None
-original_image = None
+#Create a window
+cv2.namedWindow('Intensity Level Changed Image')
 
-# Create the main window
 root = tk.Tk()
-root.title("Intensity Adjuster")
+root.title("Image Intensity Reduction")
 
-# Create a button to open the image
+# Create a button to open an image
 open_button = tk.Button(root, text="Open Image", command=open_image)
 open_button.pack(pady=10)
 
-# Open the Tkinter window
 root.mainloop()
 
-# Close all OpenCV windows
+cv2.waitKey(0)
 cv2.destroyAllWindows()
